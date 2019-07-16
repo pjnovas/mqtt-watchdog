@@ -1,0 +1,16 @@
+{
+  "name": "mqtt-watchdog",
+  "version": "1.0.0",
+  "description": "a nodejs subscriber to MQTT topics and storage of messages into a database",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Pablo Novas <pjnovas@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^3.2.7",
+    "mqtt": "^3.0.0"
+  }
+}
