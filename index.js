@@ -1,31 +1,23 @@
-const { create } = require('./subscriber');
-const { connect, getTimestamp } = require('./mongo');
+const logger = require('./logger');
+const { create } = require('./mqttClient');
+const { connect, getTimestamp } = require('./mongoClient');
 
-connect((err, db, dbClient) => {
-  if (err) {
-    console.log(err);
-    return;
-  }
+const onError = logger.error;
 
-  const mqttClient = create({
-    topic: 'stove/#',
-    onError: console.log,
-    onMessage: (topic, message) => {
-      const collection = db.collection(topic.replace('/', '_'));
-      collection.insert([{ message }], { w:1 }, function(err, result) {
-        if (err) {
-          console.log(err);
-          return;
-        }
+connect()
+  .then(({ db, client }) => {
+    const mqttClient = create({
+      topic: 'stove/#',
+      onError,
+      onMessage: (topic, message) => {
+        logger.debug('Message Received', { topic, message });
+        const collection = db.collection(topic.replace('/', '_'));
+        collection.insertOne({ message }, { w:1 }).catch(onError);
+      }
+    });
 
-        console.log(result);
-        console.log(getTimestamp(result._id));
-      });
-    }
-  });
-
-  process.on('exit', () => {
-    dbClient.close();
-    mqttClient.end();
-  });
-});
+    process.on('exit', () => {
+      client.close();
+      mqttClient.end();
+    });
+  }).catch(onError);
