@@ -14,37 +14,38 @@ const options = {
 };
 
 module.exports = {
-  create: ({ topic, onMessage, onError }) => {
-    const clientId = `watchdog-${topic.replace('/', '-')}`;
-    // const statusTopic = `${clientId}/status`;
+  create: ({ topics, onMessage, onError }) => {
+    const clientId = 'watchdog';
+    const statusTopic = `${clientId}/status`;
 
     logger.info('Connecting to MQTT', { options, clientId });
     const client = mqtt.connect({
       ...options,
-      // clientId
+      clientId,
 
-      // DOES NOT WORK - not sure why
-      // will: {
-      //   topic: statusTopic,
-      //   payload: 'OFFLINE',
-      //   qos: 0,
-      //   retain: false
-      // }
+      will: {
+        topic: statusTopic,
+        payload: 'OFFLINE',
+        qos: 0,
+        retain: false
+      }
     });
 
     return client
       .on('error', onError)
       .on('connect', res => {
         logger.info('Connected to MQTT!', res);
-        // When [will] message is fixed
-        // client.publish(statusTopic, 'ONLINE');
-        client.subscribe(topic, { qos: 0 }, (err, granted) => {
-          if (err) {
-            logger.error('Error Subscribing to MQTT!', err);
-            return;
-          }
+        client.publish(statusTopic, 'ONLINE');
 
-          logger.info('Subscribed to MQTT!', granted)
+        topics.forEach(topic => {
+          client.subscribe(topic, { qos: 0 }, (err, granted) => {
+            if (err) {
+              logger.error('Error Subscribing to MQTT!', err);
+              return;
+            }
+
+            logger.info('Subscribed to MQTT!', granted)
+          });
         });
       })
       .on('message', (topic, message) => {

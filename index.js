@@ -7,7 +7,11 @@ const onError = logger.error;
 connect()
   .then(({ db, client }) => {
     const mqttClient = create({
-      topic: 'stove/#',
+      topics: [
+        'stove/#',
+        'power-1/#',
+        'tower-1/#'
+      ],
       onError,
       onMessage: (topic, message) => {
         logger.debug('Message Received', { topic, message });
