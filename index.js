@@ -1,3 +1,4 @@
+require('dotenv').config();
 const logger = require('./logger');
 const { create } = require('./mqttClient');
 const { connect, getTimestamp } = require('./mongoClient');
@@ -8,8 +9,6 @@ connect()
   .then(({ db, client }) => {
     const mqttClient = create({
       topics: [
-        'stove/#',
-        'power-1/#',
         'tower-1/#'
       ],
       onError,
