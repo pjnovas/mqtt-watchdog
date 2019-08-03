@@ -14,7 +14,7 @@ connect()
       onError,
       onMessage: (topic, message) => {
         logger.debug('Message Received', { topic, message });
-        const collection = db.collection(topic.replace('/', '_'));
+        const collection = db.collection(topic.replace(/\//g, '_'));
         collection.insertOne({ message }, { w:1 }).catch(onError);
       }
     });
