@@ -13,6 +13,15 @@ HOST=mqtt.example.com npm start
 
 ## Using Docker
 
+With docker-compose:
+
+```
+docker-compose up --build
+```
+
+or  
+
+
 Build the image
 ```
 docker build -t mqtt-watchdog .

@@ -1,4 +1,4 @@
-version: "2"
+version: "3"
 services:
   mqtt-watchdog:
     container_name: mqtt-watchdog
@@ -12,6 +12,10 @@ services:
     container_name: mongo
     image: mongo
     volumes:
-      - ./data:/data/db
+      - mongodata:/data/db
     ports:
       - "27017:27017"
+    environment:
+      - "TZ=America/Argentina/Buenos_Aires"
+volumes:
+  mongodata:

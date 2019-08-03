@@ -1,7 +1,7 @@
 const logger = require('./logger');
 const { MongoClient, ObjectId } = require('mongodb');
 
-const url = process.env.DB_URL || 'mongodb://localhost:27017';
+const url = process.env.DB_URL || 'mongodb://mongo:27017';
 const dbName = process.env.DB_NAME || 'mqtt-watchdog';
 
 module.exports = {
