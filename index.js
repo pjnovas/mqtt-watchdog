@@ -1,26 +1,12 @@
 require('dotenv').config();
-const logger = require('./logger');
-const { create } = require('./mqttClient');
-const { connect, getTimestamp } = require('./mongoClient');
 
-const onError = logger.error;
+const mqttClient = require('./mqttClient');
+const webServer = require('./webServer');
 
-connect()
-  .then(({ db, client }) => {
-    const mqttClient = create({
-      topics: [
-        'tower-1/#'
-      ],
-      onError,
-      onMessage: (topic, message) => {
-        logger.debug('Message Received', { topic, message });
-        const collection = db.collection(topic.replace(/\//g, '_'));
-        collection.insertOne({ message }, { w:1 }).catch(onError);
-      }
-    });
+mqttClient.create({
+  topics: [
+    'tower-1/#'
+  ]
+});
 
-    process.on('exit', () => {
-      client.close();
-      mqttClient.end();
-    });
-  }).catch(onError);
+webServer.start();

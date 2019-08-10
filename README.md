@@ -11,6 +11,11 @@ npm install
 HOST=mqtt.example.com npm start
 ```
 
+You need mongodb so you can just start one from docker:
+```
+docker run -p 27017:27017 mongo
+```
+
 ## Using Docker
 
 With docker-compose:
@@ -61,5 +66,7 @@ As mongodb has an generated `_id` which already is a timestamp, time could be re
 ISODate("2019-07-16T14:42:34Z")
 ```
 
+## How to get data stored
 
+[TODO]
 

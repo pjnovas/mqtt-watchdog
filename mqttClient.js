@@ -1,5 +1,6 @@
 const logger = require('./logger');
 const mqtt = require('mqtt');
+const { connect } = require('./mongoClient');
 
 const options = {
   host: process.env.HOST,
@@ -7,19 +8,15 @@ const options = {
   // username: process.env.USR,
   // password: process.env.PWD,
   connectTimeout: 10 * 1000
-
-  // Uncomment if using Mosquitto (MQTT v3 only)
-  // protocolId: 'MQIsdp',
-  // protocolVersion: 3
 };
 
 module.exports = {
-  create: ({ topics, onMessage, onError }) => {
+  create: ({ topics }) => connect().then(({ db, client }) => {
     const clientId = 'watchdog';
     const statusTopic = `${clientId}/status`;
 
     logger.info('Connecting to MQTT', { options, clientId });
-    const client = mqtt.connect({
+    const mqttClient = mqtt.connect({
       ...options,
       clientId,
 
@@ -31,14 +28,14 @@ module.exports = {
       }
     });
 
-    return client
-      .on('error', onError)
+    mqttClient
+      .on('error', logger.error)
       .on('connect', res => {
         logger.info('Connected to MQTT!', res);
-        client.publish(statusTopic, 'ONLINE');
+        mqttClient.publish(statusTopic, 'ONLINE');
 
         topics.forEach(topic => {
-          client.subscribe(topic, { qos: 0 }, (err, granted) => {
+          mqttClient.subscribe(topic, { qos: 0 }, (err, granted) => {
             if (err) {
               logger.error('Error Subscribing to MQTT!', err);
               return;
@@ -48,8 +45,19 @@ module.exports = {
           });
         });
       })
-      .on('message', (topic, message) => {
-        onMessage(topic, message.toString());
+      .on('message', (topic, msg) => {
+        const message = msg.toString();
+        logger.debug('Message Received', { topic, message });
+
+        const collection = db.collection(topic.replace(/\//g, '_'));
+        collection.insertOne({ message }, { w:1 }).catch(logger.error);
       });
-  }
+
+    process.on('exit', () => {
+      client.close();
+      mqttClient.end();
+    });
+
+    return mqttClient;
+  })
 };
