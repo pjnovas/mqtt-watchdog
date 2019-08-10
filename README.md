@@ -68,5 +68,22 @@ ISODate("2019-07-16T14:42:34Z")
 
 ## How to get data stored
 
-[TODO]
+There is a built-in Express webserver, which exposes every collection as a route with `from` and `to` (milliseconds) querystring to get the data stored at a time frame.
 
+Example
+
+
+*GET* `http://example.com/stove-1_status?from=1565462232174&to=1565462260190` would return something like
+
+```js
+[
+  {
+    time: 1565462232174, // timestamp in milliseconds
+    value: 'OFFLINE'
+  },
+  {
+    time: 1565462260190,
+    value: 'ONLINE'
+  }
+]
+```
