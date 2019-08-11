@@ -1,6 +1,7 @@
 const logger = require('./logger');
 const http = require('http');
 const express = require('express');
+const cors = require('cors');
 const { connect, idFromEpoch, getTimestamp } = require('./mongoClient');
 
 const port = process.env.WEB_PORT || 80;
@@ -10,6 +11,7 @@ module.exports = {
     const app = express();
     const server = http.createServer(app);
 
+    app.use(cors());
     app.get('/:collection', async (req, res) => {
       const query = req.query;
       if (!query || !query.from) {
